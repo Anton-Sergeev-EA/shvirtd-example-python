@@ -13,7 +13,7 @@ if [[ "$(printf '%s\n' 2.24.0 "$version" | sort -V | head -n1)" != 2.24.0 ]]; th
     exit 1
 fi
 if [[ ! -d "$install_dir" ]]; then
-    git clone -- "$repo_url" "$install_dir"
+    (umask 022; git clone -- "$repo_url" "$install_dir")
 elif [[ ! -d "$install_dir/.git" ]]; then
     printf 'Target is not a Git repository: %s\n' "$install_dir" >&2
     exit 1
@@ -26,6 +26,8 @@ else
 fi
 cd "$install_dir"
 [[ -f .env ]] || { printf 'Required .env is missing.\n' >&2; exit 1; }
+chmod 0600 .env
+chmod 0644 haproxy/reverse/haproxy.cfg nginx/ingress/default.conf nginx/ingress/nginx.conf
 docker compose config --quiet
 docker compose up --build --detach --wait --wait-timeout 240
 curl --noproxy '*' --fail --show-error --silent --location --retry 20 --retry-connrefused --retry-delay 2 http://127.0.0.1:8090
