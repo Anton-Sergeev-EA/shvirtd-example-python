@@ -12,6 +12,7 @@ COPY requirements.txt .
 RUN python -m pip install --no-index --find-links=/wheels -r requirements.txt \
     && useradd --create-home --uid 10001 app
 COPY . .
+RUN chmod -R a=rX /app
 USER app
 EXPOSE 5000
 CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "5000"]
